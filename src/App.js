@@ -9,6 +9,20 @@ function App() {
   const [pilihCategory, setPilihCategory] = React.useState("Makanan");
   const [keranjang, setKeranjang] = React.useState([]);
 
+  const getKeranjang = React.useCallback(() => {
+    axios
+      .get(API_URL + "keranjang")
+      .then((res) => {
+        const keranjangs = res.data;
+        setKeranjang(keranjangs);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [])
+
+
+
   React.useEffect(() => {
     const fetchData = async () => {
       try {
@@ -32,6 +46,8 @@ function App() {
         console.log(err);
       });
   }, []); // Or [] if effect
+
+
   React.useEffect(() => {
     axios
       .get(API_URL + "keranjang")
@@ -43,6 +59,7 @@ function App() {
         console.log(err);
       });
   }, [pilihCategory]);
+
   const changeCategory = (value) => {
     setPilihCategory(value);
     setMenus([]);
@@ -66,74 +83,76 @@ function App() {
         console.log(err);
       });
   };
-  // React.useEffect(() => {
-  //   axios
-  //     .get(API_URL + "keranjang")
-  //     .then((res) => {
-  //       const keranjangs = res.data;
-  //       setKeranjang(keranjangs);
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //     });
-  // }, []);
+
+  const addItemKeranjang = React.useCallback((res, value) => {
+    const keranjangItem = {
+      jumlah: 1,
+      totalHarga: value.harga,
+      product: value,
+    };
+    axios
+      .post(API_URL + "keranjang", keranjangItem)
+      .then((res) => {
+        swal({
+          title: "Sukses Masuk Keranjang",
+          text: "Sekses Masuk Keranjang " + keranjangItem.product.nama,
+          icon: "success",
+          button: false,
+          timer: 2000,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [])
+
+  const updateItemKeranjang = React.useCallback((res, value) => {
+    const keranjangItem = {
+      jumlah: res.data[0].jumlah + 1,
+      totalHarga: res.data[0].totalHarga + value.harga,
+      product: value,
+    };
+    axios
+      .put(API_URL + "keranjang/" + res.data[0].id, keranjangItem)
+      .then((result) => {
+        // setKeranjang([...keranjang, result.data])
+        swal({
+          title: "Sukses Masuk Keranjang",
+          text: "Sekses Masuk Keranjang " + keranjangItem.product.nama,
+          icon: "success",
+          button: false,
+          timer: 2000,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    let tmp = [...keranjang]
+    let newKeranjang = tmp.forEach(item => {
+      if (item.id === res.data[0].id) {
+        item = { ...keranjangItem }
+      }
+    });
+    console.log(newKeranjang)
+    // setKeranjang(newKeranjang)
+  })
 
   const masukKeranjang = (value) => {
     axios
       .get(API_URL + "keranjang?product.id=" + value.id)
       .then((res) => {
         if (res.data.length === 0) {
-          const keranjangItem = {
-            jumlah: 1,
-            totalHarga: value.harga,
-            product: value,
-          };
-          axios
-            .post(API_URL + "keranjang", keranjangItem)
-            .then((res) => {
-              swal({
-                title: "Sukses Masuk Keranjang",
-                text: "Sekses Masuk Keranjang " + keranjangItem.product.nama,
-                icon: "success",
-                button: false,
-                timer: 2000,
-              });
-            })
-            .catch((err) => {
-              console.log(err);
-            });
+          // buat item baru
+          addItemKeranjang(res, value)
         } else {
-          const keranjangItem = {
-            jumlah: res.data[0].jumlah + 1,
-            totalHarga: res.data[0].totalHarga + value.harga,
-            product: value,
-          };
-          axios
-            .put(API_URL + "keranjang/" + res.data[0].id, keranjangItem)
-            .then((res) => {
-              swal({
-                title: "Sukses Masuk Keranjang",
-                text: "Sekses Masuk Keranjang " + keranjangItem.product.nama,
-                icon: "success",
-                button: false,
-                timer: 2000,
-              });
-            })
-            .catch((err) => {
-              console.log(err);
-            });
+          // update item keranjang yang id nya sama
+          updateItemKeranjang(res, value)
         }
       })
       .catch((err) => {
         console.log(err);
       });
   };
-
-  // React.useEffect(() => {
-  //   if (didMount) {
-  //     doStuff()
-  //   } else setDidMount(true)
-  // }
 
   return (
     <div>

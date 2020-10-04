@@ -4,7 +4,10 @@ import { NavbarComponent, ListCategories, Hasil, Menu } from "./Components";
 import { API_URL } from "./Utils/constants";
 import swal from "sweetalert";
 import axios from "axios";
+
 function App() {
+
+
   const [menus, setMenus] = React.useState([]);
   const [pilihCategory, setPilihCategory] = React.useState("Makanan");
   const [keranjang, setKeranjang] = React.useState([]);
@@ -21,68 +24,19 @@ function App() {
       });
   }, [])
 
-
-
-  React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await axios.get(
-          API_URL + "products?category.nama=" + pilihCategory
-        );
-        setMenus(result.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchData();
-
-    axios
-      .get(API_URL + "keranjang")
-      .then((res) => {
-        const keranjangs = res.data;
-        setKeranjang(keranjangs);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []); // Or [] if effect
-
+  const getProducts = React.useCallback(async (category) => {
+    const result = await axios.get(API_URL + "products?category.nama=" + category);
+    setMenus(result.data);
+    console.log(keranjang)
+  }, [])
 
   React.useEffect(() => {
-    axios
-      .get(API_URL + "keranjang")
-      .then((res) => {
-        const keranjangs = res.data;
-        setKeranjang(keranjangs);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, [pilihCategory]);
+    getProducts(pilihCategory)
+  }, [pilihCategory])
 
-  const changeCategory = (value) => {
-    setPilihCategory(value);
-    setMenus([]);
-
-    const fetchData = async () => {
-      try {
-        const result = await axios(API_URL + "products?category.nama=" + value);
-        setMenus(result.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchData();
-    axios
-      .get(API_URL + "keranjang?product.id=" + value.id)
-      .then((res) => {
-        const keranjangs = res.data;
-        setKeranjang(keranjangs);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
+  React.useEffect(() => {
+    getKeranjang()
+  }, [])
 
   const addItemKeranjang = React.useCallback((res, value) => {
     const keranjangItem = {
@@ -100,11 +54,12 @@ function App() {
           button: false,
           timer: 2000,
         });
+        setKeranjang([...keranjang, { ...keranjangItem }])
       })
       .catch((err) => {
         console.log(err);
       });
-  }, [])
+  }, [keranjang])
 
   const updateItemKeranjang = React.useCallback((res, value) => {
     const keranjangItem = {
@@ -123,21 +78,23 @@ function App() {
           button: false,
           timer: 2000,
         });
+
+        // update state keranjang
+        let tmp = [...keranjang]
+        console.log(tmp)
+        let index = tmp.findIndex(item => {
+          return item.id === res.data[0].id
+        })
+        tmp[index] = { ...keranjangItem }
+        setKeranjang(tmp)
       })
       .catch((err) => {
         console.log(err);
       });
-    let tmp = [...keranjang]
-    let newKeranjang = tmp.forEach(item => {
-      if (item.id === res.data[0].id) {
-        item = { ...keranjangItem }
-      }
-    });
-    console.log(newKeranjang)
-    // setKeranjang(newKeranjang)
-  })
+  }, [keranjang])
 
-  const masukKeranjang = (value) => {
+  const masukKeranjang = React.useCallback((value) => {
+    console.log(value)
     axios
       .get(API_URL + "keranjang?product.id=" + value.id)
       .then((res) => {
@@ -152,7 +109,7 @@ function App() {
       .catch((err) => {
         console.log(err);
       });
-  };
+  })
 
   return (
     <div>
@@ -161,7 +118,7 @@ function App() {
         <Container fluid>
           <Row>
             <ListCategories
-              onChangeCategory={changeCategory}
+              onChangeCategory={setPilihCategory}
               onChoiseCategory={pilihCategory}
             />
             <Col>

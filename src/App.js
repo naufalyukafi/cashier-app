@@ -4,24 +4,15 @@ import { NavbarComponent, ListCategories, Hasil, Menu } from "./Components";
 import { API_URL } from "./Utils/constants";
 import swal from "sweetalert";
 import axios from "axios";
+
 function App() {
+
+
   const [menus, setMenus] = React.useState([]);
   const [pilihCategory, setPilihCategory] = React.useState("Makanan");
   const [keranjang, setKeranjang] = React.useState([]);
 
-  React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await axios.get(
-          API_URL + "products?category.nama=" + pilihCategory
-        );
-        setMenus(result.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchData();
-
+  const getKeranjang = React.useCallback(() => {
     axios
       .get(API_URL + "keranjang")
       .then((res) => {
@@ -31,92 +22,95 @@ function App() {
       .catch((err) => {
         console.log(err);
       });
-  }, []); // Or [] if effect
+  }, [])
+
+  const getProducts = React.useCallback(async (category) => {
+    const result = await axios.get(API_URL + "products?category.nama=" + category);
+    setMenus(result.data);
+    console.log(keranjang)
+  }, [])
+
   React.useEffect(() => {
-    axios
-      .get(API_URL + "keranjang")
-      .then((res) => {
-        const keranjangs = res.data;
-        setKeranjang(keranjangs);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, [pilihCategory]);
-  const changeCategory = (value) => {
-    setPilihCategory(value);
-    setMenus([]);
+    getProducts(pilihCategory)
+  }, [pilihCategory])
 
-    const fetchData = async () => {
-      try {
-        const result = await axios(API_URL + "products?category.nama=" + value);
-        setMenus(result.data);
-      } catch (error) {
-        console.log(error);
-      }
+  React.useEffect(() => {
+    getKeranjang()
+  }, [])
+
+  const addItemKeranjang = React.useCallback((res, value) => {
+    const keranjangItem = {
+      jumlah: 1,
+      totalHarga: value.harga,
+      product: value,
     };
-    fetchData();
     axios
-      .get(API_URL + "keranjang?product.id=" + value.id)
+      .post(API_URL + "keranjang", keranjangItem)
       .then((res) => {
-        const keranjangs = res.data;
-        setKeranjang(keranjangs);
+        swal({
+          title: "Sukses Masuk Keranjang",
+          text: "Sekses Masuk Keranjang " + keranjangItem.product.nama,
+          icon: "success",
+          button: false,
+          timer: 2000,
+        });
+        setKeranjang([...keranjang, { ...keranjangItem }])
       })
       .catch((err) => {
         console.log(err);
       });
-  };
+  }, [keranjang])
 
-  const masukKeranjang = (value) => {
+  const updateItemKeranjang = React.useCallback((res, value) => {
+    const keranjangItem = {
+      jumlah: res.data[0].jumlah + 1,
+      totalHarga: res.data[0].totalHarga + value.harga,
+      product: value,
+    };
+    axios
+      .put(API_URL + "keranjang/" + res.data[0].id, keranjangItem)
+      .then((result) => {
+        // setKeranjang([...keranjang, result.data])
+        swal({
+          title: "Sukses Masuk Keranjang",
+          text: "Sekses Masuk Keranjang " + keranjangItem.product.nama,
+          icon: "success",
+          button: false,
+          timer: 2000,
+        });
+
+        // update state keranjang
+        let tmp = [...keranjang]
+        console.log(tmp)
+        let index = tmp.findIndex(item => {
+          return item.id === res.data[0].id
+        })
+        tmp[index] = { ...keranjangItem }
+        setKeranjang(tmp)
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [keranjang])
+  
+  const masukKeranjang = React.useCallback((value) => {
+    console.log(value)
     axios
       .get(API_URL + "keranjang?product.id=" + value.id)
       .then((res) => {
         if (res.data.length === 0) {
-          const keranjangItem = {
-            jumlah: 1,
-            totalHarga: value.harga,
-            product: value,
-          };
-          axios
-            .post(API_URL + "keranjang", keranjangItem)
-            .then((res) => {
-              swal({
-                title: "Sukses Masuk Keranjang",
-                text: "Sekses Masuk Keranjang " + keranjangItem.product.nama,
-                icon: "success",
-                button: false,
-                timer: 2000,
-              });
-            })
-            .catch((err) => {
-              console.log(err);
-            });
+          // buat item baru
+          addItemKeranjang(res, value)
         } else {
-          const keranjangItem = {
-            jumlah: res.data[0].jumlah + 1,
-            totalHarga: res.data[0].totalHarga + value.harga,
-            product: value,
-          };
-          axios
-            .put(API_URL + "keranjang/" + res.data[0].id, keranjangItem)
-            .then((res) => {
-              swal({
-                title: "Sukses Masuk Keranjang",
-                text: "Sekses Masuk Keranjang " + keranjangItem.product.nama,
-                icon: "success",
-                button: false,
-                timer: 2000,
-              });
-            })
-            .catch((err) => {
-              console.log(err);
-            });
+          // update item keranjang yang id nya sama
+          updateItemKeranjang(res, value)
         }
       })
       .catch((err) => {
         console.log(err);
       });
-  };
+  })
+
   return (
     <div>
       <NavbarComponent />
@@ -124,7 +118,7 @@ function App() {
         <Container fluid>
           <Row>
             <ListCategories
-              onChangeCategory={changeCategory}
+              onChangeCategory={setPilihCategory}
               onChoiseCategory={pilihCategory}
             />
             <Col>

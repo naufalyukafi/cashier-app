@@ -66,17 +66,6 @@ function App() {
         console.log(err);
       });
   };
-  // React.useEffect(() => {
-  //   axios
-  //     .get(API_URL + "keranjang")
-  //     .then((res) => {
-  //       const keranjangs = res.data;
-  //       setKeranjang(keranjangs);
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //     });
-  // }, []);
 
   const masukKeranjang = (value) => {
     axios
@@ -128,13 +117,6 @@ function App() {
         console.log(err);
       });
   };
-
-  // React.useEffect(() => {
-  //   if (didMount) {
-  //     doStuff()
-  //   } else setDidMount(true)
-  // }
-
   return (
     <div>
       <NavbarComponent />

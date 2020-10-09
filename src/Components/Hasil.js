@@ -2,15 +2,6 @@ import React from "react";
 import { Col, Row, ListGroup, ListGroupItem, Badge } from "react-bootstrap";
 import { formatNumber } from "../Utils/utils";
 const Hasil = ({ keranjangApp }) => {
-<<<<<<< HEAD
-  const [total, setTotal] = React.useState(0);
-
-  const handleTotalBelanja = () => {
-    const totalHarga = (total += keranjangApp.totalHarga);
-    setTotal(totalHarga);
-  };
-=======
->>>>>>> 539fb5e8ca85c9c30e5fdc1dc94d934799d06d06
   return (
     <Col md={3} mt={2}>
       <h4>

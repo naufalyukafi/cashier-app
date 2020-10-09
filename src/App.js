@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import { Row, Col, Container } from "react-bootstrap";
 import { NavbarComponent, ListCategories, Hasil, Menu } from "./Components";
 import { API_URL } from "./Utils/constants";

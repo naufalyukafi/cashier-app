@@ -5,12 +5,42 @@ import { API_URL } from "./Utils/constants";
 import swal from "sweetalert";
 import axios from "axios";
 
+interface IMenu {
+  id?: number;
+  kode: string
+  nama: string
+  harga: number
+  is_ready: boolean
+  gambar: string
+  category: ICategory
+}
+
+interface ICategory {
+  id?: number;
+  nama: string;
+}
+
+export interface IKeranjang {
+  id?: number
+  jumlah: number
+  totalHarga: number
+  product: IMenu
+}
+
 function App() {
 
 
-  const [menus, setMenus] = React.useState([]);
-  const [pilihCategory, setPilihCategory] = React.useState("Makanan");
-  const [keranjang, setKeranjang] = React.useState([]);
+  const [menus, setMenus] = React.useState<IMenu[]>([]);
+  const [pilihCategory, setPilihCategory] = React.useState<ICategory>({ id: 1, nama: "Makanan" })
+  const [keranjang, setKeranjang] = React.useState<IKeranjang[]>([]);
+
+  React.useEffect(() => {
+    getProducts(pilihCategory)
+  }, [pilihCategory])
+
+  React.useEffect(() => {
+    getKeranjang()
+  }, [])
 
   const getKeranjang = React.useCallback(() => {
     axios
@@ -24,19 +54,12 @@ function App() {
       });
   }, [])
 
-  const getProducts = React.useCallback(async (category) => {
-    const result = await axios.get(API_URL + "products?category.nama=" + category);
+  const getProducts = React.useCallback(async (category: ICategory) => {
+    const result = await axios.get(API_URL + "products?category.nama=" + category.nama);
     setMenus(result.data);
-    console.log(keranjang)
   }, [])
 
-  React.useEffect(() => {
-    getProducts(pilihCategory)
-  }, [pilihCategory])
 
-  React.useEffect(() => {
-    getKeranjang()
-  }, [])
 
   const addItemKeranjang = React.useCallback((res, value) => {
     const keranjangItem = {
@@ -51,7 +74,7 @@ function App() {
           title: "Sukses Masuk Keranjang",
           text: "Sekses Masuk Keranjang " + keranjangItem.product.nama,
           icon: "success",
-          button: false,
+          // buttons : false,
           timer: 2000,
         });
         setKeranjang([...keranjang, { ...keranjangItem }])
@@ -62,7 +85,7 @@ function App() {
   }, [keranjang])
 
   const updateItemKeranjang = React.useCallback((res, value) => {
-    const keranjangItem = {
+    const keranjangItem: IKeranjang = {
       jumlah: res.data[0].jumlah + 1,
       totalHarga: res.data[0].totalHarga + value.harga,
       product: value,
@@ -75,14 +98,14 @@ function App() {
           title: "Sukses Masuk Keranjang",
           text: "Sekses Masuk Keranjang " + keranjangItem.product.nama,
           icon: "success",
-          button: false,
+          // buttons: false,
           timer: 2000,
         });
 
         // update state keranjang
-        let tmp = [...keranjang]
+        let tmp: IKeranjang[] = [...keranjang]
         console.log(tmp)
-        let index = tmp.findIndex(item => {
+        let index: number = tmp.findIndex((item: IKeranjang) => {
           return item.id === res.data[0].id
         })
         tmp[index] = { ...keranjangItem }
@@ -93,8 +116,7 @@ function App() {
       });
   }, [keranjang])
 
-  const masukKeranjang = React.useCallback((value) => {
-    console.log(value)
+  const masukKeranjang = React.useCallback((value: IMenu) => {
     axios
       .get(API_URL + "keranjang?product.id=" + value.id)
       .then((res) => {
@@ -109,7 +131,7 @@ function App() {
       .catch((err) => {
         console.log(err);
       });
-  })
+  }, [keranjang])
 
   return (
     <div>
@@ -137,7 +159,7 @@ function App() {
                   ))}
               </Row>
             </Col>
-            <Hasil keranjangApp={keranjang} />
+            <Hasil keranjang={keranjang} />
           </Row>
         </Container>
       </div>

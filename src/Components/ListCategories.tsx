@@ -3,26 +3,19 @@ import { Col, ListGroup } from "react-bootstrap";
 import axios from "axios";
 import { API_URL } from "../Utils/constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {ICategory} from "../App"
 import {
   faUtensils,
   faCoffee,
   faCheese,
 } from "@fortawesome/free-solid-svg-icons";
 
-const ListCategories = (props) => {
-  const [categories, setCategories] = React.useState([]);
-
-  React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await axios(API_URL + "categories");
-        setCategories(result.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchData();
-  }, []); // Or [] if effect
+interface IProps {
+  categories: ICategory[];
+  onChangeCategory: (category:ICategory) => void;
+  onChoiseCategory: ICategory;
+}
+const ListCategories = (props: IProps) => {
 
   const Icon = ({ nama }) => {
     if (nama === "Makanan")
@@ -39,14 +32,14 @@ const ListCategories = (props) => {
         <hr />
       </h4>
       <ListGroup>
-        {categories &&
-          categories.map((category) => (
+        {props.categories &&
+          props.categories.map((category:ICategory) => (
             <h5>
               <ListGroup.Item
                 key={category.id}
-                onClick={() => props.onChangeCategory(category.nama)}
+                onClick={() => props.onChangeCategory(category)}
                 className={
-                  props.onChoiseCategory === category.nama && "category-active"
+                  props.onChoiseCategory.nama === category.nama && "category-active"
                 }
                 style={{ cursor: "pointer" }}
               >

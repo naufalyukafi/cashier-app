@@ -1,16 +1,21 @@
 import React from "react";
 import { Col, Row, ListGroup, ListGroupItem, Badge } from "react-bootstrap";
 import { formatNumber } from "../Utils/utils";
-const Hasil = ({ keranjangApp }) => {
+import { IKeranjang } from "../App";
+
+interface Iprops {
+  keranjang: IKeranjang[];
+}
+const Hasil = (props: Iprops) => {
   return (
-    <Col md={3} mt={2}>
+    <Col md={3}>
       <h4>
         <strong>Hasil</strong>
       </h4>
       <hr />
-      {keranjangApp.length > 0 && (
+      {props.keranjang.length > 0 && (
         <ListGroup variant="flush">
-          {keranjangApp.map((menuKeranjang) => (
+          {props.keranjang.map((menuKeranjang) => (
             <Row>
               <Col xs={2}>
                 <h4>
@@ -30,9 +35,6 @@ const Hasil = ({ keranjangApp }) => {
           ))}
         </ListGroup>
       )}
-      <h4>
-        <strong>Total Belanja: {total}</strong>
-      </h4>
     </Col>
   );
 };

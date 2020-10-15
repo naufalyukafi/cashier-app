@@ -14,6 +14,9 @@ type IProps = {
   onChangeCategory: (category:ICategory) => void;
   selectedCategory: ICategory;
 }
+type Icategory2 = {
+  nama: string;
+}
 const ListCategories = (props: IProps) => {
   const [categories, setCategories] = React.useState<ICategory[]>([])
 
@@ -25,15 +28,15 @@ const ListCategories = (props: IProps) => {
   React.useEffect(()=> {
     getCategories()
   }, [])
-
-  // const Icon = () => {
-  //   if (nama === "Makanan")
-  //     return <FontAwesomeIcon icon={faUtensils} className="mr-2" />;
-  //   if (nama === "Minuman")
-  //     return <FontAwesomeIcon icon={faCoffee} className="mr-2" />;
-  //   if (nama === "Cemilan")
-  //     return <FontAwesomeIcon icon={faCheese} className="mr-2" />;
-  // };
+  const Icon = ({ nama }:Icategory2):JSX.Element => {
+      if (nama === "Makanan")
+        return <FontAwesomeIcon icon={faUtensils} className="mr-2" />;
+      if (nama === "Minuman")
+        return <FontAwesomeIcon icon={faCoffee} className="mr-2" />;
+      if (nama === "Cemilan")
+        return <FontAwesomeIcon icon={faCheese} className="mr-2" />;
+        throw new Error('Invalid value');
+    };
   return (
     <Col md={2} >
       <h4>
@@ -52,7 +55,7 @@ const ListCategories = (props: IProps) => {
                 }
                 style={{ cursor: "pointer" }}
               >
-                {/* <Icon nama={category.nama} /> */}
+                <Icon nama={category.nama} />
                 {category.nama}
               </ListGroup.Item>
             </h5>

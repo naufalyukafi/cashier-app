@@ -5,7 +5,7 @@ import { API_URL } from "./Utils/constants";
 import swal from "sweetalert";
 import axios from "axios";
 
-export interface IMenu {
+export type IMenu = {
   id?: number;
   kode: string
   nama: string
@@ -15,12 +15,12 @@ export interface IMenu {
   category: ICategory
 }
 
-export interface ICategory {
+export type ICategory = {
   id?: number;
   nama: string;
 }
 
-export interface IKeranjang {
+export type IKeranjang = {
   id?: number;
   jumlah: number;
   totalHarga: number;
@@ -28,8 +28,6 @@ export interface IKeranjang {
 }
 
 function App() {
-
-
   const [menus, setMenus] = React.useState<IMenu[]>([]);
   const [pilihCategory, setPilihCategory] = React.useState<ICategory>({ id: 1, nama: "Makanan" })
   const [keranjang, setKeranjang] = React.useState<IKeranjang[]>([]);

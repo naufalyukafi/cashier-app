@@ -1,7 +1,14 @@
 import React from "react";
 import { Col, Card } from "react-bootstrap";
 import { formatNumber } from "../Utils/utils";
-const Menu = ({ menu, masukKeranjang }) => {
+import {IMenu} from "../App"
+
+type IPropsMenu = {
+  menu : IMenu
+  masukKeranjang : (value : IMenu)=> void
+}
+
+const Menu = ({ menu, masukKeranjang } : IPropsMenu ) => {
   return (
     <Col md={4} xs={6} className="mb-4">
       <Card onClick={() => masukKeranjang(menu)}>
@@ -13,7 +20,7 @@ const Menu = ({ menu, masukKeranjang }) => {
             "/" +
             menu.gambar
           }
-          y
+          
         />
         <Card.Body>
           <Card.Title>

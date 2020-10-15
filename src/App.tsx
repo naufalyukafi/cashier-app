@@ -5,7 +5,7 @@ import { API_URL } from "./Utils/constants";
 import swal from "sweetalert";
 import axios from "axios";
 
-interface IMenu {
+export interface IMenu {
   id?: number;
   kode: string
   nama: string
@@ -77,7 +77,7 @@ function App() {
           // buttons : false,
           timer: 2000,
         });
-        setKeranjang([...keranjang, { ...keranjangItem }])
+        setKeranjang([...keranjang, keranjangItem])
       })
       .catch((err) => {
         console.log(err);
@@ -141,8 +141,7 @@ function App() {
           <Row>
             <ListCategories
               onChangeCategory={setPilihCategory}
-              onChoiseCategory={pilihCategory}
-              categories = {cate}
+              selectedCategory={pilihCategory}
             />
             <Col>
               <h4>
